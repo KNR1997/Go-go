@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5"
 	repo "github.com/knr1997/quiz-tracker-backend/internal/adapters/postgresql/sqlc"
 	"github.com/knr1997/quiz-tracker-backend/internal/courses"
@@ -19,11 +20,36 @@ import (
 func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
 
+	// -------- CORS --------
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:1420", // Vue dev
+			"http://localhost:3000", // just in case
+			"tauri://localhost",     // Tauri desktop
+		},
+		AllowedMethods: []string{
+			"GET", "POST", "PUT", "DELETE", "OPTIONS",
+		},
+		AllowedHeaders: []string{
+			"Accept",
+			"Authorization",
+			"Content-Type",
+			"X-CSRF-Token",
+		},
+		ExposedHeaders: []string{
+			"Link",
+		},
+		AllowCredentials: true,
+		MaxAge:           300, // cache preflight
+	}))
+	// ----------------------
+
 	// A good base middleware stack
 	r.Use(middleware.RequestID) // important for rate limiting
 	r.Use(middleware.RealIP)    // import for rate limiting and analytics and tracing
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer) // recover from crashes
+	r.Use(middleware.Timeout(60 * time.Second))
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
