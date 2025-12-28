@@ -7,6 +7,7 @@ package tutorial
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -300,6 +301,61 @@ func (q *Queries) ListQuizzes(ctx context.Context) ([]Quiz, error) {
 	return items, nil
 }
 
+const listQuizzesWithCourse = `-- name: ListQuizzesWithCourse :many
+SELECT
+  q.id AS quiz_id,
+  q.course_id,
+  q.week_number,
+  q.date_time,
+  q.status,
+
+  c.id AS course_id,
+  c.name AS course_name,
+  c.code AS course_code
+FROM quizzes q
+JOIN courses c ON q.course_id = c.id
+`
+
+type ListQuizzesWithCourseRow struct {
+	QuizID     int64              `json:"quiz_id"`
+	CourseID   int64              `json:"course_id"`
+	WeekNumber pgtype.Int4        `json:"week_number"`
+	DateTime   pgtype.Timestamptz `json:"date_time"`
+	Status     string             `json:"status"`
+	CourseID_2 int64              `json:"course_id_2"`
+	CourseName string             `json:"course_name"`
+	CourseCode string             `json:"course_code"`
+}
+
+func (q *Queries) ListQuizzesWithCourse(ctx context.Context) ([]ListQuizzesWithCourseRow, error) {
+	rows, err := q.db.Query(ctx, listQuizzesWithCourse)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListQuizzesWithCourseRow
+	for rows.Next() {
+		var i ListQuizzesWithCourseRow
+		if err := rows.Scan(
+			&i.QuizID,
+			&i.CourseID,
+			&i.WeekNumber,
+			&i.DateTime,
+			&i.Status,
+			&i.CourseID_2,
+			&i.CourseName,
+			&i.CourseCode,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCourse = `-- name: UpdateCourse :one
 UPDATE courses
 SET
@@ -340,10 +396,10 @@ RETURNING id, course_id, week_number, date_time, status, created_at
 `
 
 type UpdateQuizParams struct {
-	ID         int64              `json:"id"`
-	WeekNumber pgtype.Int4        `json:"week_number"`
-	DateTime   pgtype.Timestamptz `json:"date_time"`
-	Status     string             `json:"status"`
+	ID         int64       `json:"id"`
+	WeekNumber pgtype.Int4 `json:"week_number"`
+	DateTime   time.Time   `json:"date_time"`
+	Status     string      `json:"status"`
 }
 
 func (q *Queries) UpdateQuiz(ctx context.Context, arg UpdateQuizParams) (Quiz, error) {
