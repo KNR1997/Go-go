@@ -85,6 +85,7 @@ INSERT INTO quizzes (
   status
 ) VALUES ($1, $2, $3, $4) RETURNING *;
 
+
 -- name: UpdateQuiz :one
 UPDATE quizzes
 SET
@@ -95,7 +96,23 @@ WHERE
   id = $1
 RETURNING *;
 
+
 -- name: DeleteQuiz :exec
 DELETE FROM quizzes
 WHERE
   id = $1;
+
+
+-- name: ListQuizzesWithCourse :many
+SELECT
+  q.id AS quiz_id,
+  q.course_id,
+  q.week_number,
+  q.date_time,
+  q.status,
+
+  c.id AS course_id,
+  c.name AS course_name,
+  c.code AS course_code
+FROM quizzes q
+JOIN courses c ON q.course_id = c.id;
