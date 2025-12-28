@@ -20,7 +20,7 @@ func NewHandler(service Service) *handler {
 }
 
 func (h *handler) ListQuizzes(w http.ResponseWriter, r *http.Request) {
-	quizzes, err := h.service.ListQuizzes(r.Context())
+	quizzes, err := h.service.ListQuizzesWithCourse(r.Context())
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
