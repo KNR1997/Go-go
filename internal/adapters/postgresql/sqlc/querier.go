@@ -21,6 +21,7 @@ type Querier interface {
 	ListCourses(ctx context.Context) ([]Course, error)
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListQuizzes(ctx context.Context) ([]Quiz, error)
+	ListQuizzesWithCourse(ctx context.Context) ([]ListQuizzesWithCourseRow, error)
 	UpdateCourse(ctx context.Context, arg UpdateCourseParams) (Course, error)
 	UpdateQuiz(ctx context.Context, arg UpdateQuizParams) (Quiz, error)
 }
