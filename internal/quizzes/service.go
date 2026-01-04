@@ -57,8 +57,11 @@ func (s *svc) UpdateQuiz(ctx context.Context, id int64, tempQuiz updateQuizParam
 			Int32: int32(tempQuiz.WeekNumber),
 			Valid: true,
 		},
-		DateTime: parsedTime,
-		Status:   tempQuiz.Status,
+		DateTime: pgtype.Timestamptz{
+			Time:  parsedTime,
+			Valid: true,
+		},
+		Status: tempQuiz.Status,
 	})
 }
 
