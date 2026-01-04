@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5"
 	repo "github.com/knr1997/quiz-tracker-backend/internal/adapters/postgresql/sqlc"
+	"github.com/knr1997/quiz-tracker-backend/internal/auth"
 	"github.com/knr1997/quiz-tracker-backend/internal/courses"
 	"github.com/knr1997/quiz-tracker-backend/internal/orders"
 	"github.com/knr1997/quiz-tracker-backend/internal/products"
@@ -82,6 +83,11 @@ func (app *application) mount() http.Handler {
 
 	orderHandler := orders.NewHandler(nil)
 	r.Post("/orders", orderHandler.PlaceOrder)
+
+	authService := auth.NewService(repo.New(app.db))
+	authHandler := auth.NewHandler(authService)
+	r.Post("/auth/register", authHandler.Register)
+	r.Post("/auth/login", authHandler.Login)
 
 	return r
 }
