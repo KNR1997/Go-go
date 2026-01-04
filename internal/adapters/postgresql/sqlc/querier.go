@@ -13,11 +13,13 @@ type Querier interface {
 	CreateOrder(ctx context.Context, customerID int64) (Order, error)
 	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error)
 	CreateQuiz(ctx context.Context, arg CreateQuizParams) (Quiz, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCourse(ctx context.Context, id int64) error
 	DeleteQuiz(ctx context.Context, id int64) error
 	FindCourseByID(ctx context.Context, id int64) (Course, error)
 	FindProductByID(ctx context.Context, id int64) (Product, error)
 	FindQuizByID(ctx context.Context, id int64) (Quiz, error)
+	FindUserByEmail(ctx context.Context, email string) (User, error)
 	ListCourses(ctx context.Context) ([]Course, error)
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListQuizzes(ctx context.Context) ([]Quiz, error)

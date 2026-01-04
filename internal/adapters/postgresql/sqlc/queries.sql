@@ -1,16 +1,16 @@
 -- name: ListProducts :many
 SELECT
-    *
+  *
 FROM
-    products;
+  products;
 
 -- name: FindProductByID :one
 SELECT
-    *
+  *
 FROM
-    products
+  products
 WHERE
-    id = $1;
+  id = $1;
 
 -- name: CreateOrder :one
 INSERT INTO orders (
@@ -24,9 +24,9 @@ VALUES ($1, $2, $3, $4) RETURNING *;
 
 -- name: ListCourses :many
 SELECT
-    *
+  *
 FROM
-    courses;
+  courses;
 
 
 -- name: CreateCourse :one
@@ -38,11 +38,11 @@ INSERT INTO courses (
 
 -- name: FindCourseByID :one
 SELECT
-    *
+  *
 FROM
-    courses
+  courses
 WHERE
-    id = $1;
+  id = $1;
 
 
 -- name: UpdateCourse :one
@@ -63,18 +63,18 @@ WHERE
 
 -- name: ListQuizzes :many
 SELECT
-    *
+  *
 FROM
-    quizzes;
+  quizzes;
 
 
 -- name: FindQuizByID :one
 SELECT
-    *
+  *
 FROM
-    quizzes
+  quizzes
 WHERE
-    id = $1;
+  id = $1;
 
 
 -- name: CreateQuiz :one
@@ -116,3 +116,19 @@ SELECT
   c.code AS course_code
 FROM quizzes q
 JOIN courses c ON q.course_id = c.id;
+
+
+-- name: CreateUser :one
+INSERT INTO users (
+  email,
+  password_hash
+) VALUES ($1, $2) RETURNING *;
+
+
+-- name: FindUserByEmail :one
+SELECT
+  *
+FROM
+  users
+WHERE
+  email = $1;

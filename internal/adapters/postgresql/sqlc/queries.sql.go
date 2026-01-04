@@ -7,7 +7,6 @@ package tutorial
 
 import (
 	"context"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -114,6 +113,30 @@ func (q *Queries) CreateQuiz(ctx context.Context, arg CreateQuizParams) (Quiz, e
 	return i, err
 }
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (
+  email,
+  password_hash
+) VALUES ($1, $2) RETURNING id, email, password_hash, created_at
+`
+
+type CreateUserParams struct {
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.PasswordHash)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const deleteCourse = `-- name: DeleteCourse :exec
 DELETE FROM courses
 WHERE
@@ -138,11 +161,11 @@ func (q *Queries) DeleteQuiz(ctx context.Context, id int64) error {
 
 const findCourseByID = `-- name: FindCourseByID :one
 SELECT
-    id, name, code, created_at
+  id, name, code, created_at
 FROM
-    courses
+  courses
 WHERE
-    id = $1
+  id = $1
 `
 
 func (q *Queries) FindCourseByID(ctx context.Context, id int64) (Course, error) {
@@ -159,11 +182,11 @@ func (q *Queries) FindCourseByID(ctx context.Context, id int64) (Course, error) 
 
 const findProductByID = `-- name: FindProductByID :one
 SELECT
-    id, name, price_in_cents, quantity, created_at
+  id, name, price_in_cents, quantity, created_at
 FROM
-    products
+  products
 WHERE
-    id = $1
+  id = $1
 `
 
 func (q *Queries) FindProductByID(ctx context.Context, id int64) (Product, error) {
@@ -181,11 +204,11 @@ func (q *Queries) FindProductByID(ctx context.Context, id int64) (Product, error
 
 const findQuizByID = `-- name: FindQuizByID :one
 SELECT
-    id, course_id, week_number, date_time, status, created_at
+  id, course_id, week_number, date_time, status, created_at
 FROM
-    quizzes
+  quizzes
 WHERE
-    id = $1
+  id = $1
 `
 
 func (q *Queries) FindQuizByID(ctx context.Context, id int64) (Quiz, error) {
@@ -202,11 +225,32 @@ func (q *Queries) FindQuizByID(ctx context.Context, id int64) (Quiz, error) {
 	return i, err
 }
 
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT
+  id, email, password_hash, created_at
+FROM
+  users
+WHERE
+  email = $1
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, findUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listCourses = `-- name: ListCourses :many
 SELECT
-    id, name, code, created_at
+  id, name, code, created_at
 FROM
-    courses
+  courses
 `
 
 func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
@@ -236,9 +280,9 @@ func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
 
 const listProducts = `-- name: ListProducts :many
 SELECT
-    id, name, price_in_cents, quantity, created_at
+  id, name, price_in_cents, quantity, created_at
 FROM
-    products
+  products
 `
 
 func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
@@ -269,9 +313,9 @@ func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
 
 const listQuizzes = `-- name: ListQuizzes :many
 SELECT
-    id, course_id, week_number, date_time, status, created_at
+  id, course_id, week_number, date_time, status, created_at
 FROM
-    quizzes
+  quizzes
 `
 
 func (q *Queries) ListQuizzes(ctx context.Context) ([]Quiz, error) {
@@ -396,10 +440,10 @@ RETURNING id, course_id, week_number, date_time, status, created_at
 `
 
 type UpdateQuizParams struct {
-	ID         int64       `json:"id"`
-	WeekNumber pgtype.Int4 `json:"week_number"`
-	DateTime   time.Time   `json:"date_time"`
-	Status     string      `json:"status"`
+	ID         int64              `json:"id"`
+	WeekNumber pgtype.Int4        `json:"week_number"`
+	DateTime   pgtype.Timestamptz `json:"date_time"`
+	Status     string             `json:"status"`
 }
 
 func (q *Queries) UpdateQuiz(ctx context.Context, arg UpdateQuizParams) (Quiz, error) {
