@@ -26,6 +26,12 @@ $ goose up
 ## [Generate SQLC Code](generate-sqlc-code/)
 
 ```
+$ goose -s create create_users sql
+```
+
+## [Generate SQLC Code](generate-sqlc-code/)
+
+```
 $ sqlc generate
 ```
 
